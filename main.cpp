@@ -15,7 +15,7 @@ void Transaction(double *values, int agent_1, int agent_2);
 
 int main()
 {
-    int N = 50;
+    int N = 500;
     int initial_money = 1; //Expressed in multiples of M_0
     double bank[N];
     double total_bank[N];
@@ -26,8 +26,8 @@ int main()
 
     int agent_1 = 0, agent_2 = 1;
 
-    int total_runs = pow(10,3);
-    int total_time = pow(10,6);
+    int total_runs = pow(10,4);
+    int total_time = pow(10,7);
 
     int money_steps_per = 100; // Per unit aka d_money = 0.1
     int maximum_money = initial_money*10; // Guessed value, to inlcude most of the measurements.
@@ -40,7 +40,7 @@ int main()
         histogram[index] = 0;
     }
 
-    ofile.open("Histogram time=6, runs=3, N=50, dm=0.01.txt");
+    ofile.open("Histogram time=7, runs=3, N=500, dm=0.01.txt");
 
     for(int current_run = 0; current_run < total_runs; current_run++){
 
