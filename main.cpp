@@ -28,6 +28,7 @@ int main()
     int agent_1 = 0, agent_2 = 1;
 
     int total_runs = pow(10,0);
+
     int total_time = pow(10,7);
 
     int money_steps_per = 100; // Per unit aka d_money = 0.1
@@ -42,6 +43,7 @@ int main()
     }
 
     ofile.open("Histogram time=7, runs=0, N=500, dm=0.01.txt");
+
 
     for(int current_run = 0; current_run < total_runs; current_run++){
 
