@@ -5,15 +5,27 @@ import matplotlib.pyplot as plt
 def read(filename):
 	with open(filename) as f:
 		lines = f.readlines()
-		energy = [line.split()[0] for line in lines]
-		number_counted = [line.split()[1] for line in lines]
-		probability = [line.split()[2] for line in lines]
-	return energy, number_counted, probability
-path="C:/Users/Mette Wirak/Documents/Faglig/Universitetet i Oslo/Computational Physics/build-Project5-Desktop_Qt_5_9_1_MinGW_32bit-Debug/" #Endre til din
+		energy=np.zeros(len(lines))
+		number_counted=np.zeros(len(lines))
+		probability=np.zeros(len(lines))
+		i=0
+		for line in lines:
+			words= line.split()
 
-filenames=["Histogram time=7, runs=3, N=500, dm=0.01.txt"]
+			energy[i]=words[0];
+			number_counted[i]=words[1]
+			probability[i]=words[2]
+			i+=1
 
-fil_label=["$T=1$"]
+	return energy, number_counted,probability
+#path="/home/arnlaug/Documents/UiO/Compfys/Project/5/" #Endre til din
+path="/home/arnlaug/Documents/UiO/Compfys/build-5_Arnlaug-Desktop-Release/"
+
+
+#filenames=["Histogram time=7, runs=1, N=500, dm=0.01.txt"]
+filenames=["Test.txt", "Test2.txt"]
+#"Histogram time=7, runs=1, N=500, dm=0.01.txt"
+fil_label=["$runs=10^0$","$runs=10^1$" ]
 
 
 
@@ -22,7 +34,8 @@ i = 0
 for fil in filenames:
 	fil=path+fil
 	energy, number_counted, probability=read(fil)
-	plt.plot(energy, number_counted label=fil_label[i])
+
+	plt.plot(energy, probability, label=fil_label[i])
 	i=+1
 
 
