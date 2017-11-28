@@ -52,21 +52,21 @@ int main()
         histogram[index] = 0;
     }
 
-    double lambda = 0;
+    /*double lambda = 0;
     double alpha = 2;
     double gamma = 1;
     int v = 0;
     int c[N*N]; // Number of interactions between two agents.
     int *C1;
-    int *C2;
+    int *C2;*/
 
     for(int current_run = 0; current_run < total_runs; current_run++){
 
         for(int agent = 0; agent < N; agent ++){
             bank[agent] = initial_money;
-            for(int agent2 = 0; agent2 < N; agent2++){
+            /*for(int agent2 = 0; agent2 < N; agent2++){
                 c[agent+agent2*N] = 0;
-            }
+            }*/
         }
 
         for(int current_time = 0; current_time < total_time; current_time++){
@@ -79,7 +79,7 @@ int main()
             }
 
             // 5a and 5b:
-            //Transaction(bank, agent_1, agent_2);
+            Transaction(bank, agent_1, agent_2);
 
 
             // 5c:
@@ -93,38 +93,43 @@ int main()
 
 
             // 5e:
-            C1 = &c[agent_1+agent_2*N];
+            /*C1 = &c[agent_1+agent_2*N];
             C2 = &c[agent_2+agent_1*N];
             if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1,C2) ==1){
                 c[agent_1+agent_2*N] = c[agent_1+agent_2*N]+1;
                 c[agent_2+agent_1*N] = c[agent_2+agent_1*N]+1;
                 Transaction(bank, agent_1, agent_2, lambda);
-            }
+            }*/
         }
 
-        cout << "Run " << (current_run+1) << " finished.\n";
+        cout << (current_run+1) << "/" << total_runs << " finished\n";
 
         // Sort the array, so that the averages of highest/lowerst(...) moneys can be found
         qsort(bank, sizeof(bank)/sizeof(bank[0]), sizeof(bank[0]), cmp);
         for(int agent = 0; agent < N; agent++){
             average_bank[agent] += (bank[agent]/(double)total_runs);
         }
+
+        // Skal ikke histogram oppdateres i hver run?? Eller er det ikke vits å kjøre flere runs.
+        for(int agent = 0; agent < N; agent++){
+            histogram[(int)(money_steps_per*bank[agent])] ++;
+        }
     }
 
-    // Checking that the amount of money in the system is conserved.
+    // Checking that the amount of money in the system is conserved, as well as updating histogram.
     double sum=0;
     for(int agent = 0; agent < N; agent++){
         sum += bank[agent];
-        histogram[(int)(money_steps_per*bank[agent])] ++;
+        //histogram[(int)(money_steps_per*bank[agent])] ++;
     }
     // cout << "Penger i systemet = " << sum << " i snitt = " << sum/N << endl;
 
-    for(int i = 0; i < N; i++){
+    /*for(int i = 0; i < N; i++){
         for(int k = 0; k < N; k++){
             cout << c[i+k*N] << " ";
         }
         cout << endl;
-    }
+    }*/
 
     print_histogram(N, total_time, total_runs, histogram, money_steps_per, money_steps_total);
     print_averages(N, total_time, total_runs, average_bank);
@@ -198,8 +203,8 @@ void print_histogram(int N, int total_time, int total_runs, int *histogram, int 
         ofile << setiosflags(ios::showpoint | ios::uppercase);
         ofile << setw(15) << setprecision(8) << (double)index/money_steps_per;
         ofile << setw(15) << setprecision(8) << histogram[index];
-        ofile << setw(15) << setprecision(8) << ((double)histogram[index] / (double)(total_runs));
-        ofile << setw(15) << setprecision(8) << log10(((double)histogram[index] / (double)(total_runs)));
+        ofile << setw(15) << setprecision(8) << ((double)(histogram[index]*money_steps_per) / (double)(N*total_runs));
+        ofile << setw(15) << setprecision(8) << log10(((double)(histogram[index]*money_steps_per) / (double)(N*total_runs)));
         ofile << endl;
     }
     ofile.close();
@@ -214,7 +219,7 @@ void print_averages(int N, int total_time, int total_runs, double *average_bank)
     for(int agent = 0; agent < N; agent++){
         ofile2 << setiosflags(ios::showpoint | ios::uppercase);
         ofile2 << setw(15) << setprecision(8) << agent + 1;
-        ofile2 << setw(15) << setprecision(8) << average_bank[agent] << endl;
+        ofile2 << setw(15) << setprecision(8) << average_bank[agent];
         ofile2 << endl;
     }
     ofile2.close();
