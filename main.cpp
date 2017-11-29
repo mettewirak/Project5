@@ -52,7 +52,7 @@ int main()
     }
 
     double lambda = 0;
-    double alpha = 1.0;
+    double alpha = 1.5;
     /*double gamma = 1;
     int v = 0;
     int c[N*N]; // Number of interactions between two agents.
