@@ -19,9 +19,8 @@ void Transaction(double *values, int agent_1, int agent_2, double lambda);      
 int P_with_alpha(double M1, double M2, double alpha);                               // From 5d)
 int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2);
 int cmp(const void *x, const void *y);
-void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total);
-void print_averages(int N, int total_time, int total_runs, double *average_bank);
-
+void print_histogram(int N, int total_time, int total_runs, double lambda, double alpha, int *histogram, int money_steps_per, int money_steps_total);
+void print_averages(int N, int total_time, int total_runs, double lambda, double alpha, double *average_bank);
 
 
 int main()
@@ -52,9 +51,9 @@ int main()
         histogram[index] = 0;
     }
 
-    /*double lambda = 0;
-    double alpha = 2;
-    double gamma = 1;
+    double lambda = 0;
+    double alpha = 1.0;
+    /*double gamma = 1;
     int v = 0;
     int c[N*N]; // Number of interactions between two agents.
     int *C1;
@@ -79,7 +78,7 @@ int main()
             }
 
             // 5a and 5b:
-            Transaction(bank, agent_1, agent_2);
+            //Transaction(bank, agent_1, agent_2);
 
 
             // 5c:
@@ -87,9 +86,9 @@ int main()
 
 
             // 5d:
-            /*if(P_with_alpha(bank[agent_1],bank[agent_2], alpha)==1){
+            if(P_with_alpha(bank[agent_1],bank[agent_2], alpha)==1){
                 Transaction(bank, agent_1, agent_2, lambda);
-            }*/
+            }
 
 
             // 5e:
@@ -122,6 +121,7 @@ int main()
         sum += bank[agent];
         //histogram[(int)(money_steps_per*bank[agent])] ++;
     }
+    cout << "Gjennomsnittsformue: " << sum/N << endl;
     // cout << "Penger i systemet = " << sum << " i snitt = " << sum/N << endl;
 
     /*for(int i = 0; i < N; i++){
@@ -131,8 +131,8 @@ int main()
         cout << endl;
     }*/
 
-    print_histogram(N, total_time, total_runs, histogram, money_steps_per, money_steps_total);
-    print_averages(N, total_time, total_runs, average_bank);
+    print_histogram(N, total_time, total_runs, lambda, alpha, histogram, money_steps_per, money_steps_total);
+    print_averages(N, total_time, total_runs, lambda, alpha, average_bank);
 
     return 0;
 }
@@ -158,10 +158,10 @@ void Transaction(double *values, int agent_1, int agent_2, double lambda){
 
 int P_with_alpha(double M1, double M2, double alpha){
 
-    double p=pow((fabs(M1-M2)),-alpha);
-    double r=RandomNumberGenerator(gen);
+    double p = pow((fabs(M1-M2)),-alpha);
+    double r = RandomNumberGenerator(gen);
 
-    if(p>r){
+    if(p > r){
         return 1;
     }
     else{
@@ -193,9 +193,9 @@ int cmp(const void *x, const void *y) // Sorteringsfunksjon. Hentet fra https://
 }
 
 
-void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total){
+void print_histogram(int N, int total_time, int total_runs, double lambda, double alpha, int *histogram, int money_steps_per, int money_steps_total){
 
-    string filename = "Histogram N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ ".txt";
+    string filename = "Histogram N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs))) + " lambda=" + to_string(lambda) +" alpha=" + to_string(alpha) + ".txt";
     ofile.open(filename);
 
     for(int index = 0; index < money_steps_total; index++){
@@ -211,12 +211,12 @@ void print_histogram(int N, int total_time, int total_runs, int *histogram, int 
 }
 
 
-void print_averages(int N, int total_time, int total_runs, double *average_bank){
+void print_averages(int N, int total_time, int total_runs, double lambda, double alpha, double *average_bank){
 
-    string filename = "Gjennomsnittsformuer N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ ".txt";
+    string filename = "Gjennomsnittsformuer N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs))) +  " lambda=" + to_string(lambda) + " alpha=" + to_string(alpha) + ".txt";
     ofile2.open(filename);
 
-    for(int agent = 0; agent < N; agent++){
+    for(int agent = (N-1); agent > -1; agent--){
         ofile2 << setiosflags(ios::showpoint | ios::uppercase);
         ofile2 << setw(15) << setprecision(8) << agent + 1;
         ofile2 << setw(15) << setprecision(8) << average_bank[agent];
