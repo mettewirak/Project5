@@ -5,42 +5,34 @@ import matplotlib.pyplot as plt
 def read(filename):
 	with open(filename) as f:
 		lines = f.readlines()
-		energy=np.zeros(len(lines))
-		number_counted=np.zeros(len(lines))
-		probability=np.zeros(len(lines))
-		i=0
-		for line in lines:
-			words= line.split()
+		energy = [line.split()[0] for line in lines]
+		probability = [line.split()[2] for line in lines]		
+	return energy, probability
 
-			energy[i]=words[0];
-			number_counted[i]=words[1]
-			probability[i]=words[2]
-			i+=1
+path="C:/Users/Mette Wirak/Documents/Faglig/Universitetet i Oslo/Computational Physics/5 - Histogram data/"
 
-	return energy, number_counted,probability
-#path="/home/arnlaug/Documents/UiO/Compfys/Project/5/" #Endre til din
-path="/home/arnlaug/Documents/UiO/Compfys/build-5_Arnlaug-Desktop-Release/"
+filenames=["Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=0.500000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=1.000000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=1.500000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=2.000000.txt"]
 
-
-#filenames=["Histogram time=7, runs=1, N=500, dm=0.01.txt"]
-filenames=["Test.txt", "Test2.txt"]
-#"Histogram time=7, runs=1, N=500, dm=0.01.txt"
-fil_label=["$runs=10^0$","$runs=10^1$" ]
-
-
+fil_label=["alpha = 0.5", "alpha = 1.0", "alpha = 1.5", "alpha = 2.0"]
 
 i = 0
-
 for fil in filenames:
 	fil=path+fil
-	energy, number_counted, probability=read(fil)
+	energy, probability=read(fil)
 
 	plt.plot(energy, probability, label=fil_label[i])
-	i=+1
+	i=i+1
 
 
-plt.xlabel('Amout of money a agent has [M0]')
-plt.ylabel('Number of times the amount of money has appeared')
+#m = np.arange(0., 10., 0.01)
+#plt.plot(m, np.exp(-m), '--', label="$Analytical$")
 
-plt.legend(loc=2)
+
+plt.xlabel('m')
+plt.ylabel('f(m)')
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.legend(loc=1)
 plt.show()
