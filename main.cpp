@@ -19,27 +19,28 @@ void Transaction(double *values, int agent_1, int agent_2, double lambda);      
 int P_with_alpha(double M1, double M2, double alpha);                               // From 5d)
 int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2);
 int cmp(const void *x, const void *y);
-void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total);
-void print_averages(int N, int total_time, int total_runs, double *average_bank);
+void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total,int alpha, int gamma, double lambda);
+void print_averages(int N, int total_time, int total_runs, double *average_bank,int alpha, int gamma, double lambda);
 
 
 
 int main()
 {
-    int N = 500;
+    int N = 1000;
 
     int initial_money = 1; // Expressed in multiples of M_0
     double bank[N];
     double average_bank[N];
 
-    for(int agent = 0; agent < N; agent++){
-        bank[agent] = initial_money;
-        average_bank[agent] = 0;
-    }
+
     int agent_1 = 0, agent_2 = 1;
 
-    int total_runs = pow(10,3);
+    int total_runs = pow(10,4);
     int total_time = pow(10,7);
+
+    double lambda = 0.5;
+    double alpha = 1;
+    double gamma = 0;
 
     int money_steps_per = 100; // Per unit aka d_money = 0.01
     int maximum_money = initial_money*100; // Guessed value, to inlcude most of the measurements.
@@ -52,83 +53,89 @@ int main()
         histogram[index] = 0;
     }
 
-    double lambda = 0;
-    double alpha = 2;
-    double gamma = 1;
+
     int v = 0;
     int c[N*N]; // Number of interactions between two agents.
     int *C1;
     int *C2;
-
-    for(int current_run = 0; current_run < total_runs; current_run++){
-
-        for(int agent = 0; agent < N; agent ++){
+    for(alpha=2;alpha>0;alpha--){
+    for(gamma =0; gamma<5; gamma++){
+        for(int agent = 0; agent < N; agent++){
             bank[agent] = initial_money;
-            for(int agent2 = 0; agent2 < N; agent2++){
-                c[agent+agent2*N] = 0;
-            }
+            average_bank[agent] = 0;
         }
+        for(int index = 0; index < money_steps_total; index++){
+            histogram[index] = 0;
+        }
+        for(int current_run = 0; current_run < total_runs; current_run++){
 
-        for(int current_time = 0; current_time < total_time; current_time++){
-
-            agent_1 = RandomNumberGenerator(gen)*N;
-            agent_2 = RandomNumberGenerator(gen)*N;
-
-            while(agent_1 == agent_2){
-                agent_2 = RandomNumberGenerator(gen)*N;
+            for(int agent = 0; agent < N; agent ++){
+                bank[agent] = initial_money;
+                for(int agent2 = 0; agent2 < N; agent2++){
+                    c[agent+agent2*N] = 0;
+                }
             }
 
-            // 5a and 5b:
-            //Transaction(bank, agent_1, agent_2);
+            for(int current_time = 0; current_time < total_time; current_time++){
+
+                agent_1 = RandomNumberGenerator(gen)*N;
+                agent_2 = RandomNumberGenerator(gen)*N;
+
+                while(agent_1 == agent_2){
+                    agent_2 = RandomNumberGenerator(gen)*N;
+                }
+
+                // 5a and 5b:
+                //Transaction(bank, agent_1, agent_2);
 
 
-            // 5c:
-            //Transaction(bank, agent_1, agent_2, lambda);
+                // 5c:
+                //Transaction(bank, agent_1, agent_2, lambda);
 
 
-            // 5d:
-            /*if(P_with_alpha(bank[agent_1],bank[agent_2], alpha)==1){
+                // 5d:
+                /*if(P_with_alpha(bank[agent_1],bank[agent_2], alpha)==1){
                 Transaction(bank, agent_1, agent_2, lambda);
             }*/
 
 
-            // 5e:
-            C1 = &c[agent_1+agent_2*N];
-            C2 = &c[agent_2+agent_1*N];
-            if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1,C2) ==1){
-                c[agent_1+agent_2*N] = c[agent_1+agent_2*N]+1;
-                c[agent_2+agent_1*N] = c[agent_2+agent_1*N]+1;
-                Transaction(bank, agent_1, agent_2, lambda);
+                // 5e:
+                C1 = &c[agent_1+agent_2*N];
+                C2 = &c[agent_2+agent_1*N];
+                if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1,C2) ==1){
+                    c[agent_1+agent_2*N] = c[agent_1+agent_2*N]+1;
+                    c[agent_2+agent_1*N] = c[agent_2+agent_1*N]+1;
+                    Transaction(bank, agent_1, agent_2, lambda);
+                }
+            }
+
+            cout << "Run " << (current_run+1) << " finished.\n";
+
+            // Sort the array, so that the averages of highest/lowerst(...) moneys can be found
+            qsort(bank, sizeof(bank)/sizeof(bank[0]), sizeof(bank[0]), cmp);
+            for(int agent = 0; agent < N; agent++){
+                average_bank[agent] += (bank[agent]/(double)total_runs);
             }
         }
 
-        cout << "Run " << (current_run+1) << " finished.\n";
-
-        // Sort the array, so that the averages of highest/lowerst(...) moneys can be found
-        qsort(bank, sizeof(bank)/sizeof(bank[0]), sizeof(bank[0]), cmp);
+        // Checking that the amount of money in the system is conserved.
+        double sum=0;
         for(int agent = 0; agent < N; agent++){
-            average_bank[agent] += (bank[agent]/(double)total_runs);
+            sum += bank[agent];
+            histogram[(int)(money_steps_per*bank[agent])] ++;
         }
-    }
-
-    // Checking that the amount of money in the system is conserved.
-    double sum=0;
-    for(int agent = 0; agent < N; agent++){
-        sum += bank[agent];
-        histogram[(int)(money_steps_per*bank[agent])] ++;
-    }
-    // cout << "Penger i systemet = " << sum << " i snitt = " << sum/N << endl;
-
+        cout << "Penger i systemet = " << sum << " i snitt = " << sum/N << endl;
+        /*
     for(int i = 0; i < N; i++){
         for(int k = 0; k < N; k++){
             cout << c[i+k*N] << " ";
         }
         cout << endl;
-    }
+    }*/
 
-    print_histogram(N, total_time, total_runs, histogram, money_steps_per, money_steps_total);
-    print_averages(N, total_time, total_runs, average_bank);
-
+        print_histogram(N, total_time, total_runs, histogram, money_steps_per, money_steps_total, alpha, gamma, lambda);
+        print_averages(N, total_time, total_runs, average_bank, alpha, gamma, lambda);
+    }}
     return 0;
 }
 
@@ -181,16 +188,16 @@ int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c,
 
 int cmp(const void *x, const void *y) // Sorteringsfunksjon. Hentet fra https://stackoverflow.com/questions/8448790/sort-arrays-of-double-in-c.
 {
-  double xx = *(double*)x, yy = *(double*)y;
-  if (xx < yy) return -1;
-  if (xx > yy) return  1;
-  return 0;
+    double xx = *(double*)x, yy = *(double*)y;
+    if (xx < yy) return -1;
+    if (xx > yy) return  1;
+    return 0;
 }
 
 
-void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total){
+void print_histogram(int N, int total_time, int total_runs, int *histogram, int money_steps_per, int money_steps_total,int alpha, int gamma, double lambda){
 
-    string filename = "Histogram N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ ".txt";
+    string filename = "Histogram N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ " gamma="+ to_string(gamma)+" alpha="+ to_string(alpha)+" lambda="+ to_string(lambda)+ ".txt";
     ofile.open(filename);
 
     for(int index = 0; index < money_steps_total; index++){
@@ -206,16 +213,16 @@ void print_histogram(int N, int total_time, int total_runs, int *histogram, int 
 }
 
 
-void print_averages(int N, int total_time, int total_runs, double *average_bank){
+void print_averages(int N, int total_time, int total_runs, double *average_bank, int alpha, int gamma, double lambda){
 
-    string filename = "Gjennomsnittsformuer N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ ".txt";
+    string filename = "Gjennomsnittsformuer N=" + to_string(N) + " time=" + to_string(int(log10(total_time))) + " runs=" + to_string(int(log10(total_runs)))+ " gamma="+ to_string(gamma)+" alpha="+ to_string(alpha)+" lambda="+ to_string(lambda*10)+ ".txt";
     ofile2.open(filename);
-
+    cout<<lambda<<endl;
     for(int agent = 0; agent < N; agent++){
         ofile2 << setiosflags(ios::showpoint | ios::uppercase);
         ofile2 << setw(15) << setprecision(8) << agent + 1;
         ofile2 << setw(15) << setprecision(8) << average_bank[agent] << endl;
-        ofile2 << endl;
+
     }
     ofile2.close();
 }
