@@ -41,6 +41,7 @@ int main()
     double lambda = 0.5;
     double alpha = 1;
     double gamma = 0;
+    double mu=0;
 
     int money_steps_per = 100; // Per unit aka d_money = 0.01
     int maximum_money = initial_money*100; // Guessed value, to inlcude most of the measurements.
@@ -49,9 +50,7 @@ int main()
     // cout << "Number of possible values: " << money_steps_total << endl;
 
     int histogram[money_steps_total];
-    for(int index = 0; index < money_steps_total; index++){
-        histogram[index] = 0;
-    }
+
 
 
     int v = 0;
@@ -60,6 +59,9 @@ int main()
     int *C2;
     for(alpha=2;alpha>0;alpha--){
     for(gamma =0; gamma<5; gamma++){
+        for(int index = 0; index < money_steps_total; index++){
+            histogram[index] = 0;
+        }
         for(int agent = 0; agent < N; agent++){
             bank[agent] = initial_money;
             average_bank[agent] = 0;
@@ -75,9 +77,12 @@ int main()
                     c[agent+agent2*N] = 0;
                 }
             }
+            for(int year=0; year<4;year++){
+            for(int current_time = 0; current_time < total_time/4; current_time++){
+                for(int agent=0;agent<N;agent++){
+                    bank[agent]=bank[agent]-(bank[agent]-1)*mu;
 
-            for(int current_time = 0; current_time < total_time; current_time++){
-
+                }
                 agent_1 = RandomNumberGenerator(gen)*N;
                 agent_2 = RandomNumberGenerator(gen)*N;
 
@@ -108,7 +113,7 @@ int main()
                     Transaction(bank, agent_1, agent_2, lambda);
                 }
             }
-
+            }
             cout << "Run " << (current_run+1) << " finished.\n";
 
             // Sort the array, so that the averages of highest/lowerst(...) moneys can be found
