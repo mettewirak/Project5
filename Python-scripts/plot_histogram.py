@@ -1,3 +1,4 @@
+AD
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,31 +48,40 @@ path="/home/arnlaug/Documents/UiO/Compfys/build-5_Arnlaug-Desktop-Release/"
 
 #filenames=["Gjennomsnittsformuer N=1000 time=7 runs=4 gamma=0 lambda=0 alpha =1.txt","Gjennomsnittsformuer N=1000 time=7 runs=4 gamma=1 alpha=2 lambda=0.txt","Gjennomsnittsformuer N=1000 time=7 runs=4 gamma=2 alpha=1 lambda=0.txt","Gjennomsnittsformuer N=1000 time=7 runs=4 gamma=3 alpha=1 lambda=0.txt","Gjennomsnittsformuer N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]
 #filenames=["Histogram N=1000 time=7 runs=4 gamma=0 lambda=0 alpha =1.txt","Histogram N=1000 time=7 runs=4 gamma=1 alpha=2 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=2 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=3 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]
-filenames=["Histogram N=1000 time=7 runs=4 gamma=1 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]#,"Histogram N=1000 time=7 runs=4 gamma=3 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]
+#filenames=["Histogram N=1000 time=7 runs=4 gamma=1 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]#,"Histogram N=1000 time=7 runs=4 gamma=3 alpha=1 lambda=0.txt","Histogram N=1000 time=7 runs=4 gamma=4 alpha=1 lambda=0.txt"]
 
 
 #filenames=["Histogram N=500 time=7 runs=1 gamma=1 alpha=2 lambda=0.txt","Histogram N=500 time=7 runs=1 gamma=2 alpha=2 lambda=0.txt","Histogram N=500 time=7 runs=1 gamma=3 alpha=2 lambda=0.txt","Histogram N=500 time=7 runs=1 gamma=4 alpha=2 lambda=0.txt"]
-fil_label=["0","1","2","3","4"]
-color=['r','b']
+#fil_label=["0","1","2","3","4"]
+#color=['r','b']
+#i = 0
+
+
+path="C:/Users/Mette Wirak/Documents/Faglig/Universitetet i Oslo/Computational Physics/5 - Histogram data/"
+
+filenames=["Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=0.500000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=1.000000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=1.500000.txt", "Histogram N=500 time=7 runs=4 lambda=0.500000 alpha=2.000000.txt"]
+
+fil_label=["alpha = 0.5", "alpha = 1.0", "alpha = 1.5", "alpha = 2.0"]
+
 i = 0
-
 for fil in filenames:
-	print fil
 	fil=path+fil
-	amount, number_counted, probability, log=read(fil)
-	#agent,amount=read_gjennomsnitt(fil)
-	fil_label[i]=plt.bar(amount, number_counted, label=fil_label[i], width=0.005,edgecolor = "none", color=color[i])
-	#plt.plot( amount, number_counted, label=fil_label[i])
-	#plt.plot(amount,np.exp(-amount), label=fil_label[i])
-	#plt.plot(np.log10(agent), np.log10(amount), label=fil_label[i])
-	i+=1
-	
+	energy, probability=read(fil)
+
+	plt.plot(energy, probability, label=fil_label[i])
+	i=i+1
 
 
+#m = np.arange(0., 10., 0.01)
+#plt.plot(m, np.exp(-m), '--', label="$Analytical$")
 
-plt.xlabel('Amout of money a agent has [M0]')
-plt.ylabel('Number of times the amount of money has appeared')
 
-plt.legend(loc=2)
-#plt.savefig('Sammenligne for runs')
+plt.xlabel('m')
+plt.ylabel('f(m)')
+
+plt.xscale('log')
+plt.yscale('log')
+
+plt.legend(loc=1)
 plt.show()
+>>>>>>> bce35d14c4ea706c24fcc07fcdf0dfacf87a6002
