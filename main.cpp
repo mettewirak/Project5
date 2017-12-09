@@ -17,7 +17,7 @@ std::uniform_real_distribution<double> RandomNumberGenerator(0.0,1.0);
 void Transaction(double *values, int agent_1, int agent_2);                         
 void Transaction(double *values, int agent_1, int agent_2, double lambda);          
 int P_with_alpha(double M1, double M2, double alpha);                               
-int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2);
+int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c);
 int cmp(const void *x, const void *y);
 void print_histogram(int N, int total_time, int total_runs, double lambda, double alpha, int gamma, int *histogram, int money_steps_per, int money_steps_total);
 void print_averages(int N, int total_time, int total_runs, double lambda, double alpha, int gamma, double *average_bank);
@@ -38,7 +38,7 @@ int main()
 
     int agent_1 = 0, agent_2 = 1;
 
-    int total_runs = pow(10,4);
+    int total_runs = pow(10,1);
     int total_time = pow(10,7);
 
     int money_steps_per = 100;                              // Number of points we estimate per unit of m.
@@ -53,10 +53,9 @@ int main()
     double lambda = 0;
     double alpha = 0;
     double gamma = 0;
-    int v = 0;
     int c[N*N]; // Number of interactions between two agents.
     int *C1;
-    int *C2;
+
 
     for(int current_run = 0; current_run < total_runs; current_run++){
 
@@ -77,7 +76,7 @@ int main()
             }
 
             // All transactions are accepted.
-            Transaction(bank, agent_1, agent_2);
+            //Transaction(bank, agent_1, agent_2);
 
             // Including that all the agents save a fraction of their money (lambda). 
             //Transaction(bank, agent_1, agent_2, lambda);
@@ -85,16 +84,16 @@ int main()
             // Including that agents prefer to do transactions with other agents of similar wealth (determined by alpha).
             /*if(P_with_alpha(bank[agent_1],bank[agent_2], alpha)==1){
                 Transaction(bank, agent_1, agent_2, lambda);
-            }/*
+            }*/
 
             // Including that agents prefer to do transactions with agents they already know
-            /*C1 = &c[agent_1+agent_2*N];
-            C2 = &c[agent_2+agent_1*N];
-            if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1,C2) ==1){
+            C1 = &c[agent_1+agent_2*N];
+
+            if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1) ==1){
                 c[agent_1+agent_2*N] = c[agent_1+agent_2*N]+1;
                 c[agent_2+agent_1*N] = c[agent_2+agent_1*N]+1;
                 Transaction(bank, agent_1, agent_2, lambda);
-            }*/
+            }
         }
 
         cout << (current_run+1) << "/" << total_runs << " finished\n";
@@ -116,10 +115,10 @@ int main()
         sum += bank[agent];
     }
     cout << "Average wealth of an agent after the simulation: " << sum/N << endl;
-    cout << "If this is not equal to 1 (what we put as the initial value), then an error has occured.\n"
+    cout << "If this is not equal to 1 (what we put as the initial value), then an error has occured.\n";
 
-    print_histogram(N, total_time, total_runs, histogram, money_steps_per, money_steps_total, alpha, gamma, lambda);
-    print_averages(N, total_time, total_runs, average_bank, alpha, gamma, lambda);
+    print_histogram(N, total_time, total_runs, lambda, alpha, gamma, histogram, money_steps_per, money_steps_total);
+    print_averages(N, total_time, total_runs, lambda,  alpha, gamma,average_bank);
 
     return 0;
 }
@@ -157,7 +156,7 @@ int P_with_alpha(double M1, double M2, double alpha){
 }
 
 
-int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2){
+int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c){
 
     double p=pow((fabs(M1-M2)),-alpha)*pow((1+*c),gamma);
     double r=RandomNumberGenerator(gen);
