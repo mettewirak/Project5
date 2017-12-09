@@ -18,7 +18,7 @@ std::uniform_real_distribution<double> RandomNumberGenerator(0.0,1.0);
 void Transaction(double *values, int agent_1, int agent_2);                         // From 5a)
 void Transaction(double *values, int agent_1, int agent_2, double lambda);          // From 5c)
 int P_with_alpha(double M1, double M2, double alpha);                               // From 5d)
-int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2);
+int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c);
 int cmp(const void *x, const void *y);
 void print_histogram(int N, int total_time, int total_runs, double lambda, int alpha, int gamma, int *histogram, int money_steps_per, int money_steps_total);
 void print_averages(int N, int total_time, int total_runs, double lambda, int alpha, int gamma, double *average_bank);
@@ -50,12 +50,12 @@ int main(int argc, char* argv[])
     }
     int agent_1 = 0, agent_2 = 1;
 
-    int total_runs = pow(10,4);
+    int total_runs = pow(10,2);
     int runs_per_rank = total_runs/numprocs;
     int total_time = pow(10,7);
 
-    int money_steps_per = 100; // Per unit aka d_money = 0.01
-    int maximum_money = initial_money*200; // Guessed value, to inlcude most of the measurements.
+    int money_steps_per = 100;                              // Per unit of m
+    int maximum_money = initial_money*200;                  // Guessed value, to inlcude most of the measurements.
     int money_steps_total = money_steps_per*maximum_money;
 
     int histogram[money_steps_total];
@@ -68,10 +68,8 @@ int main(int argc, char* argv[])
     double lambda = 0;
     int alpha = 2;
     int gamma = 1;
-    int v = 0;
     int c[N*N]; // Number of interactions between two agents.
     int *C1;
-    int *C2;
 
     for(int current_run = 0; current_run < runs_per_rank; current_run++){
 
@@ -107,8 +105,7 @@ int main(int argc, char* argv[])
 
             // 5e:
             C1 = &c[agent_1+agent_2*N];
-            C2 = &c[agent_2+agent_1*N];
-            if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1,C2) ==1){
+            if(P_with_alpha_gamma(bank[agent_1],bank[agent_2], alpha, gamma,C1) ==1){
                 c[agent_1+agent_2*N] = c[agent_1+agent_2*N]+1;
                 c[agent_2+agent_1*N] = c[agent_2+agent_1*N]+1;
                 Transaction(bank, agent_1, agent_2, lambda);
@@ -144,22 +141,13 @@ int main(int argc, char* argv[])
     for(int agent = 0; agent < N; agent++){
         sum += bank[agent];
     }
-    //cout << "Gjennomsnittsformue: " << sum/N << endl;
 
-    /*for(int i = 0; i < N; i++){
-        for(int k = 0; k < N; k++){
-            cout << c[i+k*N] << " ";
-        }
-        cout << endl;
-    }*/
+    //cout << "Average wealth after the simulation: " << sum/N << endl;
 
     if(my_rank==0){
-        cout << "Inne i printe-if.\n";
         print_histogram(N, total_time, total_runs, lambda, alpha, gamma, histogram_MPI, money_steps_per, money_steps_total);
         print_averages(N, total_time, total_runs, lambda, alpha, gamma, average_bank_MPI);
     }
-
-    cout << "Number of runs in rank " << my_rank << ": " << number_of_runs[my_rank] << endl;
 
     MPI_Finalize();
 
@@ -199,7 +187,7 @@ int P_with_alpha(double M1, double M2, double alpha){
 }
 
 
-int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c, int *c2){
+int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c){
 
     double p=pow((fabs(M1-M2)),-alpha)*pow((1+*c),gamma);
     double r=RandomNumberGenerator(gen);
@@ -213,7 +201,7 @@ int P_with_alpha_gamma(double M1, double M2, double alpha, double gamma, int *c,
 }
 
 
-int cmp(const void *x, const void *y) // Sorteringsfunksjon. Hentet fra https://stackoverflow.com/questions/8448790/sort-arrays-of-double-in-c.
+int cmp(const void *x, const void *y) // Comparing function. Gitten from https://stackoverflow.com/questions/8448790/sort-arrays-of-double-in-c.
 {
     double xx = *(double*)x, yy = *(double*)y;
     if (xx < yy) return -1;
